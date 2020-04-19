@@ -2,18 +2,29 @@ package info.ditrapani
 
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
+import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.core.http.listenAwait
 import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.dispatcher
+import io.vertx.kotlin.ext.web.client.sendAwait
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 private const val PORT = 44778
 
-class Server : CoroutineVerticle() {
+class Server(val mockHost: String) : CoroutineVerticle() {
     override suspend fun start() {
+        val client = WebClient.create(vertx)
         val router = Router.router(vertx)
         router.get("/test/:delay").handler { routingContext ->
-            val delay = routingContext.request().getParam("delay").toLong()
-            val sendResponse: (Long) -> Unit = { routingContext.response().end("OK") }
-            vertx.setTimer(delay, sendResponse)
+            GlobalScope.launch(vertx.dispatcher()) {
+                val delay = routingContext.request().getParam("delay")
+                println("delay $delay")
+                val response = client.get(44779, mockHost, "test/$delay").sendAwait()
+                println("response $response")
+                routingContext.response().end("OK")
+                println("done")
+            }
         }
         val server = vertx.createHttpServer().requestHandler(router)
         server.listenAwait(PORT)
@@ -22,5 +33,5 @@ class Server : CoroutineVerticle() {
 }
 
 fun main() {
-    Vertx.vertx().deployVerticle(Server())
+    Vertx.vertx().deployVerticle(Server("localhost"))
 }
