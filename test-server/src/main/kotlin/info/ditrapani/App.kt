@@ -19,11 +19,8 @@ class Server(val mockHost: String) : CoroutineVerticle() {
         router.get("/test/:delay").handler { routingContext ->
             GlobalScope.launch(vertx.dispatcher()) {
                 val delay = routingContext.request().getParam("delay")
-                println("delay $delay")
-                val response = client.get(44779, mockHost, "test/$delay").sendAwait()
-                println("response $response")
-                routingContext.response().end("OK")
-                println("done")
+                val response = client.get(44779, mockHost, "/test/$delay").sendAwait()
+                routingContext.response().setStatusCode(response.statusCode()).end(response.body())
             }
         }
         val server = vertx.createHttpServer().requestHandler(router)
