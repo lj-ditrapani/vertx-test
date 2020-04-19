@@ -30,5 +30,6 @@ class Server(val mockHost: String) : CoroutineVerticle() {
 }
 
 fun main() {
-    Vertx.vertx().deployVerticle(Server("localhost"))
+    val mockHost: String = System.getenv("mockHost") ?: "localhost"
+    Vertx.vertx().deployVerticle(Server(mockHost))
 }
