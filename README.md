@@ -1,7 +1,7 @@
 Load and performance test a useless Vert.x server.
 
 - test-server: the Vert.x server we will test. [test-server/README.md](test-server/README.md)
-)
+
 - mock-server: the mock backend server that fakes a delay. [mock-server/README.md](mock-server/README.md)
 
 Follow both linked readmes to build & start each server.
